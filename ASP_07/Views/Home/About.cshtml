@@ -1,7 +1,11 @@
-﻿@{
+﻿@model string
+
+@{
     ViewData["Title"] = "About";
 }
-<h2>@ViewData["Title"]</h2>
-<h3>@ViewData["Message"]</h3>
+@*<h2>@ViewData["Title"]</h2>
+<h3>@ViewData["Message"]</h3>*@
+
+<h3>Hello, @Model</h3>
 
 <p>Use this area to provide additional information.</p>
