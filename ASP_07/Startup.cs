@@ -12,6 +12,8 @@ using Microsoft.EntityFrameworkCore;
 using ASP_07.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Authorization;
 
 namespace ASP_07
 {
@@ -37,7 +39,18 @@ namespace ASP_07
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
-            services.AddDefaultIdentity<IdentityUser>(opt =>
+            //services.AddDefaultIdentity<IdentityUser>(opt =>
+            //{
+            //    opt.Password.RequireDigit = false;
+            //    opt.Password.RequiredLength = 6; //min. 6
+            //    opt.Password.RequireLowercase = false;
+            //    opt.Password.RequireNonAlphanumeric = false;
+            //    opt.Password.RequireUppercase = false;
+            //}
+            //).AddRoles<IdentityRole>()
+            // .AddEntityFrameworkStores<ApplicationDbContext>();
+
+            services.AddIdentity<IdentityUser, IdentityRole>(opt =>
             {
                 opt.Password.RequireDigit = false;
                 opt.Password.RequiredLength = 6; //min. 6
@@ -45,8 +58,12 @@ namespace ASP_07
                 opt.Password.RequireNonAlphanumeric = false;
                 opt.Password.RequireUppercase = false;
             }
-            ).AddRoles<IdentityRole>()
-             .AddEntityFrameworkStores<ApplicationDbContext>();
+            )
+                .AddRoleManager<RoleManager<IdentityRole>>()
+                .AddDefaultUI()
+                .AddDefaultTokenProviders()
+                .AddEntityFrameworkStores<ApplicationDbContext>();
+
 
             services.AddAuthorization(opt =>
             {
@@ -54,8 +71,19 @@ namespace ASP_07
                     policy => policy.RequireRole("Admins"));
             });
 
+            services.AddMvc(config =>
+            {
+                // using Microsoft.AspNetCore.Mvc.Authorization;
+                // using Microsoft.AspNetCore.Authorization;
+                var policy = new AuthorizationPolicyBuilder()
+                                 .RequireAuthenticatedUser()
+                                 .Build();
+                config.Filters.Add(new AuthorizeFilter(policy));
+            })
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+
+            //services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
