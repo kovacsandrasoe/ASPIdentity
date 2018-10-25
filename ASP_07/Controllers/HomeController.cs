@@ -48,8 +48,20 @@ namespace ASP_07.Controllers
         [Authorize(Roles = "Admins")]
         public IActionResult AllTodo()
         {
+            var q = from x in dbContext.Todos
+                    select x;
+            return View(q);
+        }
 
-            return View();
+        [Authorize(Roles = "Admins")]
+        public IActionResult Delete(int id)
+        {
+            var q = from x in dbContext.Todos
+                    where x.ID == id
+                    select x;
+            dbContext.Todos.Remove(q.FirstOrDefault());
+            dbContext.SaveChanges();
+            return RedirectToAction("AllTodo");
         }
 
         public IActionResult Index()
